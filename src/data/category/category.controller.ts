@@ -7,32 +7,32 @@ import {
   Param,
   Post,
   Put,
-  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { ApiConsumesFromUrl } from 'src/shared';
 import { Public } from 'src/shared/decorater/public.decorator';
 import { Roles } from 'src/shared/decorater/role.decorator';
 import { USER_ROLE } from '../user/user.schema';
-import { ProductDto, QueryFilter } from './product.dto';
-import { ProductService } from './product.service';
+import { CategoryDto } from './category.dto';
+import { CategoryService } from './category.service';
 
-@Controller('product')
-@ApiTags('product')
-export class ProductController {
-  constructor(private service: ProductService) {}
+@Controller('category')
+@ApiTags('category')
+export class CategoryController {
+  constructor(private service: CategoryService) {}
 
-  @Get()
   @Public()
-  async getAll(@Query() query: QueryFilter) {
+  @Get()
+  async getAll() {
     try {
-      return await this.service.getAll(query);
+      return await this.service.getAll();
     } catch (e) {
       throw new BadRequestException(e.message);
     }
   }
-  @Get('/:slug')
+
   @Public()
+  @Get('/:slug')
   async getOne(@Param('slug') slug: string) {
     try {
       return await this.service.getOneByCondition({ slug });
@@ -40,31 +40,31 @@ export class ProductController {
       throw new BadRequestException(e.message);
     }
   }
+
   @Roles(USER_ROLE.ADMIN)
   @Post('create')
-  @ApiConsumes(ApiConsumesFromUrl)
   @ApiBearerAuth()
-  async create(@Body() input: ProductDto) {
+  @ApiConsumes(ApiConsumesFromUrl)
+  async create(@Body() input: CategoryDto) {
     try {
       return await this.service.create(input);
     } catch (e) {
       throw new BadRequestException(e.message);
     }
   }
-
-  @Put('update/:slug')
-  @ApiConsumes(ApiConsumesFromUrl)
   @Roles(USER_ROLE.ADMIN)
+  @Put('update/:slug')
   @ApiBearerAuth()
-  async update(@Param('slug') slug: string, @Body() input: ProductDto) {
+  @ApiConsumes(ApiConsumesFromUrl)
+  async update(@Param('slug') slug: string, @Body() input: CategoryDto) {
     try {
       return await this.service.update(slug, input);
     } catch (e) {
       throw new BadRequestException(e.message);
     }
   }
-  @Delete('delete/:slug')
   @Roles(USER_ROLE.ADMIN)
+  @Delete('delete/:slug')
   @ApiBearerAuth()
   async delete(@Param('slug') slug: string) {
     try {

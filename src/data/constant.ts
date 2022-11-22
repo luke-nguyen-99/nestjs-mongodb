@@ -1,5 +1,6 @@
 export const USER_MODEL_NAME = 'user';
 export const PRODUCT_MODEL_NAME = 'product';
+export const CATEGORY_MODEL_NAME = 'category';
 
 export const USER_MESSAGE = {
   NOT_NULL: 'Username hoặc password không được để trống',
@@ -13,4 +14,9 @@ export const PRODUCT_MESSAGE = {
   IMAGES_NOT_NULL: 'Price không được để trống',
   EXISTS: 'Sản phẩm đã tồn tại',
   NOT_FOUND: 'Không tìm thấy sản phẩm',
+};
+export const CATEGORY_MESSAGE = {
+  NAME_NOT_NULL: 'Name không được để trống',
+  EXISTS: 'Name đã tồn tại',
+  NOT_FOUND: 'Name không tìm thấy',
 };

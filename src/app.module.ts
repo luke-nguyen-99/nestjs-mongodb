@@ -9,7 +9,7 @@ import { AuthenticationGuard } from './shared/guard/auth.guard';
 import { SharedModule } from './shared/shared.module';
 
 @Module({
-  imports: [DatabaseModule, SharedModule, DataModule, AuthModule],
+  imports: [DatabaseModule, SharedModule, AuthModule, DataModule],
   controllers: [AppController],
   providers: [
     AppService,

@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import mongoose from 'mongoose';
 import { PRODUCT_MODEL_NAME } from '../constant';
 
 @Schema({
@@ -13,7 +14,16 @@ export class Product {
   @Prop()
   description: string;
   @Prop()
+  slug: string;
+  @Prop()
+  amount: number;
+  @Prop()
   images: string[];
+  @Prop({
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: PRODUCT_MODEL_NAME,
+  })
+  categories: string[];
 }
 
 export interface DetailProduct {

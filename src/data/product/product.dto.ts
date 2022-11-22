@@ -24,7 +24,11 @@ export class ProductDto {
   @ApiPropertyOptional()
   description: string;
   @ApiPropertyOptional()
+  amount: number;
+  @ApiPropertyOptional()
   images: string[];
+  @ApiPropertyOptional()
+  categories: string[];
 }
 
 export class QueryFilter {
@@ -44,8 +48,12 @@ export class QueryFilter {
   price: number;
   @ApiPropertyOptional()
   name: string;
+  @ApiPropertyOptional()
+  category: string;
   @ApiPropertyOptional({ type: 'enum', enum: { true: 'true', false: 'false' } })
   sortPrice: string;
+  @ApiPropertyOptional({ type: 'enum', enum: { true: 'true', false: 'false' } })
+  sortAmount: string;
   @ApiPropertyOptional({ type: 'enum', enum: { true: 'true', false: 'false' } })
   sortCreatedAt: string;
   @ApiPropertyOptional({ type: 'enum', enum: { true: 'true', false: 'false' } })
