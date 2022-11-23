@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -14,7 +15,7 @@ import { ApiConsumesFromUrl } from 'src/shared';
 import { Public } from 'src/shared/decorater/public.decorator';
 import { Roles } from 'src/shared/decorater/role.decorator';
 import { USER_ROLE } from '../user/user.schema';
-import { ProductDto, QueryFilter } from './product.dto';
+import { ProductDto, QueryFilter, SetCategoriesDto } from './product.dto';
 import { ProductService } from './product.service';
 
 @Controller('product')
@@ -35,7 +36,7 @@ export class ProductController {
   @Public()
   async getOne(@Param('slug') slug: string) {
     try {
-      return await this.service.getOneByCondition({ slug });
+      return await this.service.getOneAndPopulate({ slug });
     } catch (e) {
       throw new BadRequestException(e.message);
     }
@@ -59,6 +60,20 @@ export class ProductController {
   async update(@Param('slug') slug: string, @Body() input: ProductDto) {
     try {
       return await this.service.update(slug, input);
+    } catch (e) {
+      throw new BadRequestException(e.message);
+    }
+  }
+  @Patch('set-categories/:slug')
+  @ApiConsumes(ApiConsumesFromUrl)
+  @Roles(USER_ROLE.ADMIN)
+  @ApiBearerAuth()
+  async setCategories(
+    @Param('slug') slug: string,
+    @Body() input: SetCategoriesDto,
+  ) {
+    try {
+      return await this.service.setCategories(slug, input);
     } catch (e) {
       throw new BadRequestException(e.message);
     }

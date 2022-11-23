@@ -9,7 +9,7 @@ import {
   PRODUCT_MESSAGE,
   PRODUCT_MODEL_NAME,
 } from '../constant';
-import { ProductDto, QueryFilter } from './product.dto';
+import { ProductDto, QueryFilter, SetCategoriesDto } from './product.dto';
 import { Product } from './product.schema';
 
 @Injectable()
@@ -43,7 +43,7 @@ export class ProductService {
         from: 'category',
         localField: 'categories',
         foreignField: '_id',
-        as: 'category',
+        as: 'categories',
       },
     });
 
@@ -165,7 +165,7 @@ export class ProductService {
   }
 
   async getOneByCondition(condition) {
-    return this.model.findOne(condition).populate('categories').exec();
+    return this.model.findOne(condition).lean();
   }
 
   async getCategoryBySlugs(slugs: string[]) {
@@ -195,7 +195,7 @@ export class ProductService {
         update.push(category?._id);
       });
     }
-    return this.model.insertMany([
+    await this.model.insertMany([
       {
         name,
         detail,
@@ -206,6 +206,7 @@ export class ProductService {
         categories: update,
       },
     ]);
+    return this.getOneAndPopulate({ slug });
   }
 
   async update(slug: string, input: ProductDto) {
@@ -235,12 +236,52 @@ export class ProductService {
     }
     await this.model.updateOne({ _id: product._id }, newRecord);
 
-    return this.getOneByCondition({ _id: product._id });
+    return this.getOneAndPopulate({ _id: product._id });
   }
 
   async delete(slug: string) {
     const product = await this.getOneByCondition({ slug });
     if (!product) throw new BadRequestException(PRODUCT_MESSAGE.NOT_FOUND);
     return this.model.deleteOne({ _id: product._id });
+  }
+
+  async setCategories(slug: string, input: SetCategoriesDto) {
+    const product = await this.getOneByCondition({ slug });
+    if (!product) throw new BadRequestException(PRODUCT_MESSAGE.NOT_FOUND);
+
+    const dataUpdate = [];
+    dataUpdate.push(...product.categories);
+    const listCategory = await this.getCategoryBySlugs(input.category);
+    if (!listCategory || listCategory.length < 1)
+      throw new BadRequestException(CATEGORY_MESSAGE.NOT_FOUND);
+
+    listCategory.forEach((category) => {
+      dataUpdate.push(category._id);
+    });
+
+    await this.model.updateOne(
+      { _id: product._id },
+      { categories: dataUpdate },
+    );
+
+    return this.getOneAndPopulate({ _id: product._id });
+  }
+
+  async getOneAndPopulate(condition) {
+    return this.model
+      .aggregate([
+        {
+          $match: condition,
+        },
+        {
+          $lookup: {
+            from: CATEGORY_MODEL_NAME,
+            localField: 'categories',
+            foreignField: '_id',
+            as: 'categories',
+          },
+        },
+      ])
+      .exec();
   }
 }

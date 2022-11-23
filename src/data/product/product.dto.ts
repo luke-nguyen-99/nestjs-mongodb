@@ -1,4 +1,4 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class DetailProductDto {
   @ApiPropertyOptional()
@@ -58,4 +58,9 @@ export class QueryFilter {
   sortCreatedAt: string;
   @ApiPropertyOptional({ type: 'enum', enum: { true: 'true', false: 'false' } })
   sortUpdatedAt: string;
+}
+
+export class SetCategoriesDto {
+  @ApiProperty()
+  category: string[];
 }
