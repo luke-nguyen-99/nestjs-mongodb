@@ -1,3 +1,4 @@
+import { ApiConsumesFromData } from './../../shared/index';
 import {
   BadRequestException,
   Body,
@@ -9,6 +10,7 @@ import {
   Post,
   Put,
   Query,
+  UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
@@ -51,13 +53,20 @@ export class ProductController {
       type: 'object',
       properties: {
         name: { type: 'string' },
+        detail: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              size: { type: 'string' },
+              price: { type: 'number' },
+            },
+          },
+        },
         description: { type: 'string' },
-        hero: { type: 'array', items: { type: 'string' } },
-        weapon: { type: 'array', items: { type: 'string' } },
         amount: { type: 'number' },
-
-        categories: { type: 'string' },
-        images: {
+        category: { type: 'string' },
+        files: {
           type: 'array',
           items: {
             type: 'string',
@@ -67,23 +76,60 @@ export class ProductController {
       },
     },
   })
+  @ApiConsumes(ApiConsumesFromData)
   @ApiBearerAuth()
-  @UseInterceptors(AnyFilesInterceptor(multerOptions()))
-  async create(@Body() input: ProductDto) {
+  @UseInterceptors(AnyFilesInterceptor(multerOptions))
+  async create(
+    @Body() input: ProductDto,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+  ) {
     try {
-      return await this.service.create(input);
+      return await this.service.create(input, files);
     } catch (e) {
       throw new BadRequestException(e.message);
     }
   }
 
   @Put('update/:slug')
-  @ApiConsumes(ApiConsumesFromUrl)
+  @ApiConsumes(ApiConsumesFromData)
   @Roles(USER_ROLE.ADMIN)
   @ApiBearerAuth()
-  async update(@Param('slug') slug: string, @Body() input: ProductDto) {
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        detail: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              size: { type: 'string' },
+              price: { type: 'number' },
+            },
+          },
+        },
+        description: { type: 'string' },
+        amount: { type: 'number' },
+        category: { type: 'string' },
+        files: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+  })
+  @UseInterceptors(AnyFilesInterceptor(multerOptions))
+  async update(
+    @Param('slug') slug: string,
+    @Body() input: ProductDto,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+  ) {
     try {
-      return await this.service.update(slug, input);
+      return await this.service.update(slug, input, files);
     } catch (e) {
       throw new BadRequestException(e.message);
     }

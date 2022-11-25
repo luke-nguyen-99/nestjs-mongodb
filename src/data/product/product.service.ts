@@ -6,9 +6,11 @@ import { Category } from '../category/category.schema';
 import {
   CATEGORY_MESSAGE,
   CATEGORY_MODEL_NAME,
+  DRIVE_MODEL_NAME,
   PRODUCT_MESSAGE,
   PRODUCT_MODEL_NAME,
 } from '../constant';
+import { DriveService } from '../drive/drive.service';
 import { ProductDto, QueryFilter, SetCategoriesDto } from './product.dto';
 import { Product } from './product.schema';
 
@@ -19,6 +21,8 @@ export class ProductService {
     private model: Model<Product & Document>,
     @InjectModel(CATEGORY_MODEL_NAME)
     private categoryModel: Model<Category & Document>,
+
+    private driveService: DriveService,
   ) {}
 
   async getAll(filter: QueryFilter) {
@@ -38,14 +42,24 @@ export class ProductService {
       sortAmount,
     } = filter;
     const queryFilter = [];
-    queryFilter.push({
-      $lookup: {
-        from: 'category',
-        localField: 'categories',
-        foreignField: '_id',
-        as: 'categories',
+    queryFilter.push(
+      {
+        $lookup: {
+          from: CATEGORY_MODEL_NAME,
+          localField: 'categories',
+          foreignField: '_id',
+          as: 'categories',
+        },
       },
-    });
+      {
+        $lookup: {
+          from: DRIVE_MODEL_NAME,
+          localField: 'images',
+          foreignField: '_id',
+          as: 'images',
+        },
+      },
+    );
 
     if (!!size) queryFilter.push({ $match: { 'detail.size': { $eq: size } } });
     if (!!price) queryFilter.push({ $match: { 'detail.price': +price } });
@@ -172,55 +186,87 @@ export class ProductService {
     return this.categoryModel.find({ slug: { $in: slugs } }).lean();
   }
 
-  async create(input: ProductDto) {
-    const { name, detail, description, images, amount, categories } = input;
+  async create(input: ProductDto, files: Array<Express.Multer.File>) {
+    const { name, detail, description, amount, category } = input;
     if (!name) throw new BadRequestException(PRODUCT_MESSAGE.NAME_NOT_NULL);
-    if (!images || images.length == 0)
-      throw new BadRequestException(PRODUCT_MESSAGE.IMAGES_NOT_NULL);
+    const listImageId = [];
+    if (!!files && files.length > 0) {
+      (await this.driveService.uploadMultiFiles(files)).forEach((e) => {
+        listImageId.push(e['_id']);
+      });
+    }
 
     if (!detail || detail.length == 0)
       throw new BadRequestException(PRODUCT_MESSAGE.SIZE_NOT_NULL);
+    const listDetail = detail.split('},');
+    const details = listDetail.map((e, index) => {
+      let item = e;
+      if (index < listDetail.length - 1) {
+        item = e + '}';
+      }
+      return JSON.parse(item);
+    });
 
     let slug = changeToSlug(name);
     const slugExist = await this.getOneByCondition({ slug });
     if (!!slugExist) slug = changeToSlug(name, new Date());
 
-    const update = [];
-    if (!!categories && categories.length > 0) {
+    const listCategoryId = [];
+    if (!!category) {
+      const categories = category.split(',');
       const listCategory = await this.getCategoryBySlugs(categories);
       if (!listCategory || listCategory.length < 1)
         throw new BadRequestException(CATEGORY_MESSAGE.NOT_FOUND);
 
       listCategory.forEach((category) => {
-        update.push(category?._id);
+        listCategoryId.push(category?._id);
       });
     }
     await this.model.insertMany([
       {
         name,
-        detail,
+        detail: details,
         description,
-        images,
+        images: listImageId,
         slug,
         amount: !!amount || amount == 0 ? +amount : null,
-        categories: update,
+        categories: listCategoryId,
       },
     ]);
     return this.getOneAndPopulate({ slug });
   }
 
-  async update(slug: string, input: ProductDto) {
+  async update(
+    slug: string,
+    input: ProductDto,
+    files: Array<Express.Multer.File>,
+  ) {
     const product = await this.getOneByCondition({ slug });
     if (!product) throw new BadRequestException(PRODUCT_MESSAGE.NOT_FOUND);
-    const { name, detail, description, images, amount, categories } = input;
+    const { name, detail, description, amount, category } = input;
     const newRecord = {};
     if (!!name && name != product.name) newRecord['name'] = name;
     if (!!description && description != product.description)
       newRecord['description'] = description;
-    if (!!images && images.length > 0) newRecord['images'] = images;
-    if (!!detail && detail.length > 0) newRecord['detail'] = detail;
+    if (!!files && files.length > 0) {
+      newRecord['images'] = [];
+      (await this.driveService.uploadMultiFiles(files)).forEach((e) => {
+        newRecord['images'].push(e['_id']);
+      });
+    }
+    if (!!detail && detail.length > 0) {
+      const listDetail = detail.split('},');
+      newRecord['detail'] = listDetail.map((e, index) => {
+        let item = e;
+        if (index < listDetail.length - 1) {
+          item = e + '}';
+        }
+        return JSON.parse(item);
+      });
+    }
 
-    if (!!categories && categories.length > 0) {
+    if (!!category) {
+      const categories = category.split(',');
       newRecord['categories'] = [];
       const listCategory = await this.getCategoryBySlugs(categories);
       if (!listCategory || listCategory.length < 1)
@@ -251,7 +297,8 @@ export class ProductService {
 
     const dataUpdate = [];
     dataUpdate.push(...product.categories);
-    const listCategory = await this.getCategoryBySlugs(input.category);
+    const categories = input.category.split(',');
+    const listCategory = await this.getCategoryBySlugs(categories);
     if (!listCategory || listCategory.length < 1)
       throw new BadRequestException(CATEGORY_MESSAGE.NOT_FOUND);
 
@@ -279,6 +326,14 @@ export class ProductService {
             localField: 'categories',
             foreignField: '_id',
             as: 'categories',
+          },
+        },
+        {
+          $lookup: {
+            from: DRIVE_MODEL_NAME,
+            localField: 'images',
+            foreignField: '_id',
+            as: 'images',
           },
         },
       ])

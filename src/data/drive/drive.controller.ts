@@ -1,12 +1,12 @@
 import {
   Controller,
   Post,
-  UploadedFile,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiConsumesFromData } from 'src/shared';
 import { Public } from 'src/shared/decorator/public.decorator';
 import { Roles } from 'src/shared/decorator/role.decorator';
 import { USER_ROLE } from '../user/user.schema';
@@ -21,7 +21,22 @@ export class DriveController {
   constructor(private service: DriveService) {}
   @Post('upload')
   @Public()
-  @UseInterceptors(AnyFilesInterceptor(multerOptions()))
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        files: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+  })
+  @ApiConsumes(ApiConsumesFromData)
+  @UseInterceptors(AnyFilesInterceptor(multerOptions))
   async upload(@UploadedFiles() files: Array<Express.Multer.File>) {
     return this.service.uploadMultiFiles(files);
   }

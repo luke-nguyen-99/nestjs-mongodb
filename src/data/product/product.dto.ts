@@ -20,15 +20,13 @@ export class ProductDto {
       },
     },
   })
-  detail: DetailProductDto[];
+  detail: string;
   @ApiPropertyOptional()
   description: string;
   @ApiPropertyOptional()
   amount: number;
   @ApiPropertyOptional()
-  images: string[];
-  @ApiPropertyOptional()
-  categories: string[];
+  category: string;
 }
 
 export class QueryFilter {
@@ -62,5 +60,5 @@ export class QueryFilter {
 
 export class SetCategoriesDto {
   @ApiProperty()
-  category: string[];
+  category: string;
 }

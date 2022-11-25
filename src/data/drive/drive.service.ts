@@ -41,15 +41,15 @@ export class DriveService {
       process.env.google_drive_refresh_token,
     );
 
-    const oauth2Client = new google.auth.OAuth2(
-      process.env.google_drive_client_id,
-      process.env.google_drive_client_secret,
-      process.env.google_drive_redirect_uri,
-    );
-    oauth2Client.setCredentials({
-      refresh_token: process.env.google_drive_refresh_token,
-    });
-    this.doc.useOAuth2Client(oauth2Client).then();
+    // const oauth2Client = new google.auth.OAuth2(
+    //   process.env.google_drive_client_id,
+    //   process.env.google_drive_client_secret,
+    //   process.env.google_drive_redirect_uri,
+    // );
+    // oauth2Client.setCredentials({
+    //   refresh_token: process.env.google_drive_refresh_token,
+    // });
+    // this.doc.useOAuth2Client(oauth2Client).then();
   }
 
   async uploadFile(file: Express.Multer.File): Promise<string> {
@@ -92,7 +92,12 @@ export class DriveService {
   }
 
   async uploadMultiFiles(files: Array<Express.Multer.File>): Promise<Drive[]> {
-    const promiseUploadFile = files.map((file) => this.create(file));
-    return Promise.all([...promiseUploadFile]);
+    // const promiseUploadFile = files.map((file) => this.create(file));
+    // return Promise.all([...promiseUploadFile]);
+    const result = [];
+    for (let i = 0; i < files.length; i++) {
+      result.push(await this.create(files[i]));
+    }
+    return result;
   }
 }
