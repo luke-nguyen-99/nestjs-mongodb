@@ -21,7 +21,38 @@ export class CategoryService {
   ) {}
 
   async getAll() {
-    return this.model.find().lean();
+    return this.model
+      .aggregate([
+        {
+          $lookup: {
+            from: PRODUCT_MODEL_NAME,
+            localField: '_id',
+            foreignField: 'categories',
+            as: 'product',
+          },
+        },
+        {
+          $addFields: {
+            total_product: {
+              $function: {
+                body: function (arr) {
+                  return arr.length;
+                },
+                args: ['$product'],
+                lang: 'js',
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            name: 1,
+            slug: 1,
+            total_product: 1,
+          },
+        },
+      ])
+      .exec();
   }
 
   async getOneByCondition(condition) {
