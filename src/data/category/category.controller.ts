@@ -10,8 +10,8 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { ApiConsumesFromUrl } from 'src/shared';
-import { Public } from 'src/shared/decorater/public.decorator';
-import { Roles } from 'src/shared/decorater/role.decorator';
+import { Public } from 'src/shared/decorator/public.decorator';
+import { Roles } from 'src/shared/decorator/role.decorator';
 import { USER_ROLE } from '../user/user.schema';
 import { CategoryDto } from './category.dto';
 import { CategoryService } from './category.service';

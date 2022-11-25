@@ -9,11 +9,14 @@ import {
   Post,
   Put,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { ApiConsumesFromUrl } from 'src/shared';
-import { Public } from 'src/shared/decorater/public.decorator';
-import { Roles } from 'src/shared/decorater/role.decorator';
+import { Public } from 'src/shared/decorator/public.decorator';
+import { Roles } from 'src/shared/decorator/role.decorator';
+import { multerOptions } from '../drive/multer-option';
 import { USER_ROLE } from '../user/user.schema';
 import { ProductDto, QueryFilter, SetCategoriesDto } from './product.dto';
 import { ProductService } from './product.service';
@@ -43,8 +46,29 @@ export class ProductController {
   }
   @Roles(USER_ROLE.ADMIN)
   @Post('create')
-  @ApiConsumes(ApiConsumesFromUrl)
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        description: { type: 'string' },
+        hero: { type: 'array', items: { type: 'string' } },
+        weapon: { type: 'array', items: { type: 'string' } },
+        amount: { type: 'number' },
+
+        categories: { type: 'string' },
+        images: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+  })
   @ApiBearerAuth()
+  @UseInterceptors(AnyFilesInterceptor(multerOptions()))
   async create(@Body() input: ProductDto) {
     try {
       return await this.service.create(input);

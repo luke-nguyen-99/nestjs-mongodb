@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { ApiConsumesFromUrl } from 'src/shared';
-import { Public } from 'src/shared/decorater/public.decorator';
+import { Public } from 'src/shared/decorator/public.decorator';
 import { SignInDto } from './auth.dto';
 import { AuthService } from './auth.service';
 
