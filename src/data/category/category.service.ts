@@ -32,23 +32,10 @@ export class CategoryService {
           },
         },
         {
-          $addFields: {
-            total_product: {
-              $function: {
-                body: function (arr) {
-                  return arr.length;
-                },
-                args: ['$product'],
-                lang: 'js',
-              },
-            },
-          },
-        },
-        {
           $project: {
             name: 1,
             slug: 1,
-            total_product: 1,
+            total_product: { $size: '$product' },
           },
         },
       ])

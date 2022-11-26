@@ -69,49 +69,22 @@ export class ProductService {
       queryFilter.push({ $match: { 'detail.price': { $lte: +maxPrice } } });
     if (!!name) queryFilter.push({ $match: { name: { $eq: name } } });
 
-    if (!!keyword)
-      queryFilter.push(
-        ...[
-          {
-            $addFields: {
-              fieldFilter: {
-                $function: {
-                  body: function (a, b, c, d) {
-                    let result = '';
-                    if (!!a) result += a;
-                    if (!!b) result += b;
-                    if (!!c) result += c;
-                    if (!!d) result += d;
-                    return result;
-                  },
-                  args: [
-                    '$name',
-                    '$description',
-                    '$detail.size',
-                    '$detail.price',
-                  ],
-                  lang: 'js',
-                },
-              },
-            },
-          },
-          {
-            $addFields: {
-              result: {
-                $regexMatch: {
-                  input: '$fieldFilter',
-                  regex: `${keyword}`,
-                  options: 'i',
-                },
-              },
-            },
-          },
-          {
-            $match: { result: true },
-          },
-        ],
-      );
-
+    if (!!keyword) {
+      const key = new RegExp(keyword, 'i');
+      queryFilter.push({
+        $match: {
+          $or: [
+            { name: key },
+            { slug: key },
+            { description: key },
+            { 'detail.size': key },
+            { 'detail.price': key },
+            { 'categories.slug': key },
+            { 'categories.name': key },
+          ],
+        },
+      });
+    }
     if (!!sortPrice && sortPrice == 'true') {
       queryFilter.push({ $sort: { 'detail.price': -1 } });
     } else if (!!sortPrice && sortPrice == 'false') {
@@ -130,31 +103,9 @@ export class ProductService {
 
     if (!!category) {
       const categories = category.split(',');
-      queryFilter.push(
-        ...[
-          {
-            $addFields: {
-              filterCategory: {
-                $function: {
-                  body: function (arr, filter) {
-                    const checked = filter.filter(
-                      (e) => !!arr.find((i) => i.slug == e),
-                    );
-
-                    if (!!checked && checked.length == filter.length)
-                      return true;
-                  },
-                  args: ['$category', categories],
-                  lang: 'js',
-                },
-              },
-            },
-          },
-          {
-            $match: { filterCategory: true },
-          },
-        ],
-      );
+      categories.forEach((e) => {
+        queryFilter.push({ $match: { 'categories.slug': e } });
+      });
     }
 
     if (!!sortAmount && sortAmount == 'true') {
