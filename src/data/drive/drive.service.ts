@@ -35,10 +35,10 @@ export class DriveService {
     private model: Model<Drive & Document>,
   ) {
     this.drive = this.createDriveClient(
-      process.env.google_drive_client_id,
-      process.env.google_drive_client_secret,
-      process.env.google_drive_redirect_uri,
-      process.env.google_drive_refresh_token,
+      '541988291333-q0ts76og7ku9cgrdsjdoqbtq9vvopmel.apps.googleusercontent.com',
+      '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',
+      'https://developers.google.com/oauthplayground',
+      '1//04SYIiZE1qumwCgYIARAAGAQSNwF-L9Irf8veMeN9iPQGPlGTjDqV5Q-yf-Pz2S4LveACQrYhmk1bToiVFjbbpIsQ2zIG-xqFPN8',
     );
 
     // const oauth2Client = new google.auth.OAuth2(

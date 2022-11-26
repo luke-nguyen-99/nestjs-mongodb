@@ -36,6 +36,8 @@ export class CategoryService {
             name: 1,
             slug: 1,
             total_product: { $size: '$product' },
+            createdAt: 1,
+            updatedAt: 1,
           },
         },
       ])
