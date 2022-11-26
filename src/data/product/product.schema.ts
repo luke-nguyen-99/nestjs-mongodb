@@ -18,6 +18,8 @@ export class Product {
   @Prop()
   amount: number;
   @Prop()
+  sale: number;
+  @Prop()
   images: string[];
   @Prop({
     type: [mongoose.Schema.Types.ObjectId],

@@ -37,6 +37,7 @@ export class ProductService {
       name,
       category,
       sortPrice,
+      sortSale,
       sortCreatedAt,
       sortUpdatedAt,
       sortAmount,
@@ -85,6 +86,13 @@ export class ProductService {
         },
       });
     }
+
+    if (!!sortSale && sortSale == 'true') {
+      queryFilter.push({ $sort: { sale: -1 } });
+    } else if (!!sortSale && sortSale == 'false') {
+      queryFilter.push({ $sort: { sale: 1 } });
+    }
+
     if (!!sortPrice && sortPrice == 'true') {
       queryFilter.push({ $sort: { 'detail.price': -1 } });
     } else if (!!sortPrice && sortPrice == 'false') {
@@ -126,7 +134,18 @@ export class ProductService {
     queryFilter.push({ $limit: !!limit ? +limit : 9 });
     queryFilter.push({ $skip: !!offset ? +offset : 0 });
     const data = await this.model.aggregate(queryFilter).exec();
-    return { total: allData[0]?.total, data };
+    const result = data.map((e) => {
+      if (!!e.sale) {
+        e.detail.map((o) => {
+          o['new_price'] = parseFloat(
+            ((+o.price * (100 - +e.sale)) / 100).toFixed(2),
+          );
+          return o;
+        });
+      }
+      return e;
+    });
+    return { total: allData[0]?.total, data: result };
   }
 
   async getOneByCondition(condition) {
@@ -138,7 +157,7 @@ export class ProductService {
   }
 
   async create(input: ProductDto, files: Array<Express.Multer.File>) {
-    const { name, detail, description, amount, category } = input;
+    const { name, detail, description, amount, sale, category } = input;
     if (!name) throw new BadRequestException(PRODUCT_MESSAGE.NAME_NOT_NULL);
     const listImageId = [];
     if (!!files && files.length > 0) {
@@ -182,6 +201,7 @@ export class ProductService {
         slug,
         amount: !!amount || amount == 0 ? +amount : null,
         categories: listCategoryId,
+        sale: !!sale ? +sale : null,
       },
     ]);
     return this.getOneAndPopulate({ slug });
@@ -194,7 +214,7 @@ export class ProductService {
   ) {
     const product = await this.getOneByCondition({ slug });
     if (!product) throw new BadRequestException(PRODUCT_MESSAGE.NOT_FOUND);
-    const { name, detail, description, amount, category } = input;
+    const { name, detail, description, amount, category, sale } = input;
     const newRecord = {};
     if (!!name && name != product.name) newRecord['name'] = name;
     if (!!description && description != product.description)
@@ -231,7 +251,10 @@ export class ProductService {
     if ((!!amount || amount == 0) && amount != product.amount) {
       newRecord['amount'] = +amount;
     }
-    await this.model.updateOne({ _id: product._id }, newRecord);
+    await this.model.updateOne(
+      { _id: product._id },
+      { ...newRecord, sale: !!sale ? +sale : null },
+    );
 
     return this.getOneAndPopulate({ _id: product._id });
   }
@@ -266,7 +289,7 @@ export class ProductService {
   }
 
   async getOneAndPopulate(condition) {
-    return this.model
+    const result = await this.model
       .aggregate([
         {
           $match: condition,
@@ -289,5 +312,29 @@ export class ProductService {
         },
       ])
       .exec();
+
+    const data = result.map((e) => {
+      if (!!e.sale) {
+        e.detail.map((o) => {
+          o['new_price'] = parseFloat(
+            ((+o.price * (100 - +e.sale)) / 100).toFixed(2),
+          );
+          return o;
+        });
+      }
+      return e;
+    });
+    return data[0];
+  }
+
+  async setSale(slug: string, sale: number) {
+    const product = await this.getOneByCondition({ slug });
+    if (!product) throw new BadRequestException(PRODUCT_MESSAGE.NOT_FOUND);
+    await this.model.updateOne(
+      { _id: product._id },
+      { sale: !!sale ? +sale : sale },
+    );
+
+    return this.getOneAndPopulate({ _id: product._id });
   }
 }

@@ -8,24 +8,11 @@ export class DetailProductDto {
 }
 
 export class ProductDto {
-  @ApiPropertyOptional()
   name: string;
-  @ApiPropertyOptional({
-    type: 'array',
-    items: {
-      type: 'object',
-      properties: {
-        size: { type: 'string' },
-        price: { type: 'number' },
-      },
-    },
-  })
   detail: string;
-  @ApiPropertyOptional()
   description: string;
-  @ApiPropertyOptional()
   amount: number;
-  @ApiPropertyOptional()
+  sale: number;
   category: string;
 }
 
@@ -51,6 +38,8 @@ export class QueryFilter {
   @ApiPropertyOptional({ type: 'enum', enum: { true: 'true', false: 'false' } })
   sortPrice: string;
   @ApiPropertyOptional({ type: 'enum', enum: { true: 'true', false: 'false' } })
+  sortSale: string;
+  @ApiPropertyOptional({ type: 'enum', enum: { true: 'true', false: 'false' } })
   sortAmount: string;
   @ApiPropertyOptional({ type: 'enum', enum: { true: 'true', false: 'false' } })
   sortCreatedAt: string;
@@ -61,4 +50,8 @@ export class QueryFilter {
 export class SetCategoriesDto {
   @ApiProperty()
   category: string;
+}
+export class SetSaleDto {
+  @ApiProperty()
+  sale: number;
 }

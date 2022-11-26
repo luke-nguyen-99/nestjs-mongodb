@@ -20,7 +20,12 @@ import { Public } from 'src/shared/decorator/public.decorator';
 import { Roles } from 'src/shared/decorator/role.decorator';
 import { multerOptions } from '../drive/multer-option';
 import { USER_ROLE } from '../user/user.schema';
-import { ProductDto, QueryFilter, SetCategoriesDto } from './product.dto';
+import {
+  ProductDto,
+  QueryFilter,
+  SetCategoriesDto,
+  SetSaleDto,
+} from './product.dto';
 import { ProductService } from './product.service';
 
 @Controller('product')
@@ -65,6 +70,7 @@ export class ProductController {
         },
         description: { type: 'string' },
         amount: { type: 'number' },
+        sale: { type: 'number' },
         category: { type: 'string' },
         files: {
           type: 'array',
@@ -111,6 +117,7 @@ export class ProductController {
         },
         description: { type: 'string' },
         amount: { type: 'number' },
+        sale: { type: 'number' },
         category: { type: 'string' },
         files: {
           type: 'array',
@@ -154,6 +161,18 @@ export class ProductController {
   async delete(@Param('slug') slug: string) {
     try {
       return await this.service.delete(slug);
+    } catch (e) {
+      throw new BadRequestException(e.message);
+    }
+  }
+
+  @Patch('set-sale/:slug')
+  @ApiConsumes(ApiConsumesFromUrl)
+  @Roles(USER_ROLE.ADMIN)
+  @ApiBearerAuth()
+  async setSale(@Param('slug') slug: string, @Body() input: SetSaleDto) {
+    try {
+      return await this.service.setSale(slug, input.sale);
     } catch (e) {
       throw new BadRequestException(e.message);
     }
