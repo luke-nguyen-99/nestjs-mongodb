@@ -36,6 +36,8 @@ export class QueryFilter {
   @ApiPropertyOptional()
   category: string;
   @ApiPropertyOptional({ type: 'enum', enum: { true: 'true', false: 'false' } })
+  isSale: string;
+  @ApiPropertyOptional({ type: 'enum', enum: { true: 'true', false: 'false' } })
   sortPrice: string;
   @ApiPropertyOptional({ type: 'enum', enum: { true: 'true', false: 'false' } })
   sortSale: string;

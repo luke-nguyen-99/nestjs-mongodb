@@ -36,6 +36,7 @@ export class ProductService {
       price,
       name,
       category,
+      isSale,
       sortPrice,
       sortSale,
       sortCreatedAt,
@@ -113,6 +114,16 @@ export class ProductService {
       const categories = category.split(',');
       categories.forEach((e) => {
         queryFilter.push({ $match: { 'categories.slug': e } });
+      });
+    }
+
+    if (!!isSale && isSale == 'true') {
+      queryFilter.push({ $match: { sale: { $ne: null } } });
+    } else if (!!isSale && isSale == 'false') {
+      queryFilter.push({
+        $match: {
+          $or: [{ sale: { $exists: false } }, { sale: { $eq: null } }],
+        },
       });
     }
 
