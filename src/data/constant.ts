@@ -2,6 +2,7 @@ export const USER_MODEL_NAME = 'user';
 export const PRODUCT_MODEL_NAME = 'product';
 export const CATEGORY_MODEL_NAME = 'category';
 export const DRIVE_MODEL_NAME = 'drive';
+export const CLOUD_MODEL_NAME = 'cloud';
 
 export const USER_MESSAGE = {
   NOT_NULL: 'Username hoặc password không được để trống',

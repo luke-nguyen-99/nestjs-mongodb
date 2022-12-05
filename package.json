@@ -34,6 +34,7 @@
     "class-validator": "^0.13.2",
     "google-spreadsheet": "^3.3.0",
     "googleapis": "^109.0.1",
+    "imagekit": "^4.1.2",
     "migrate-mongoose": "^4.0.0",
     "mongoose": "^6.7.2",
     "passport": "^0.6.0",
