@@ -11,7 +11,7 @@ import { UserModule } from './user/user.module';
     ProductModule,
     CategoryModule,
     DriveModule,
-    CloudModule,
+    // CloudModule,
   ],
 })
 export class DataModule {}
