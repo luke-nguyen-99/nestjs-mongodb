@@ -13,6 +13,7 @@ import { CloudService } from './cloud.service';
         schema: CloudSchema,
       },
     ]),
+    // ImageKitModule
   ],
   providers: [CloudService],
   controllers: [CloudController],

@@ -7,6 +7,8 @@ import { CLOUD_MODEL_NAME } from '../constant';
 })
 export class Cloud {
   @Prop()
+  file_id: string;
+  @Prop()
   url: string;
   @Prop()
   background: boolean;
