@@ -41,7 +41,7 @@ export class CloudController {
   @UseInterceptors(AnyFilesInterceptor(multerOptions))
   async upload(@UploadedFiles() files: Array<Express.Multer.File>) {
     try {
-      return await this.service.uploadMultipleFiles(files);
+      return await this.service.uploadMultiFiles(files);
     } catch (e) {
       throw new BadRequestException(e.message);
     }

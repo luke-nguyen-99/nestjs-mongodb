@@ -5,7 +5,7 @@ import { ProductService } from './product.service';
 import { CATEGORY_MODEL_NAME, PRODUCT_MODEL_NAME } from '../constant';
 import { ProductSchema } from './product.schema';
 import { CategorySchema } from '../category/category.schema';
-import { DriveModule } from '../drive/drive.module';
+import { CloudModule } from '../cloud/cloud.module';
 
 @Module({
   imports: [
@@ -19,7 +19,7 @@ import { DriveModule } from '../drive/drive.module';
         schema: CategorySchema,
       },
     ]),
-    DriveModule,
+    CloudModule,
   ],
   providers: [ProductService],
   controllers: [ProductController],

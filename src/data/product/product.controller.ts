@@ -18,7 +18,6 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { ApiConsumesFromUrl } from 'src/shared';
 import { Public } from 'src/shared/decorator/public.decorator';
 import { Roles } from 'src/shared/decorator/role.decorator';
-import { multerOptions } from '../drive/multer-option';
 import { USER_ROLE } from '../user/user.schema';
 import {
   ProductDto,
@@ -27,6 +26,7 @@ import {
   SetSaleDto,
 } from './product.dto';
 import { ProductService } from './product.service';
+import { multerOptions } from '../cloud/multer-option';
 
 @Controller('product')
 @ApiTags('product')

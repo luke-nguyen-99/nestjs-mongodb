@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
-import { PRODUCT_MODEL_NAME } from '../constant';
+import { CATEGORY_MODEL_NAME, PRODUCT_MODEL_NAME } from '../constant';
 
 @Schema({
   timestamps: true,
@@ -23,7 +23,7 @@ export class Product {
   images: string[];
   @Prop({
     type: [mongoose.Schema.Types.ObjectId],
-    ref: PRODUCT_MODEL_NAME,
+    ref: CATEGORY_MODEL_NAME,
   })
   categories: string[];
 }

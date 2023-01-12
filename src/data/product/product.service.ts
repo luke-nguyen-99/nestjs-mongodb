@@ -3,14 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { changeToSlug } from 'src/shared';
 import { Category } from '../category/category.schema';
+import { CloudService } from '../cloud/cloud.service';
 import {
   CATEGORY_MESSAGE,
   CATEGORY_MODEL_NAME,
-  DRIVE_MODEL_NAME,
+  CLOUD_MODEL_NAME,
   PRODUCT_MESSAGE,
   PRODUCT_MODEL_NAME,
 } from '../constant';
-import { DriveService } from '../drive/drive.service';
 import { ProductDto, QueryFilter, SetCategoriesDto } from './product.dto';
 import { Product } from './product.schema';
 
@@ -22,7 +22,7 @@ export class ProductService {
     @InjectModel(CATEGORY_MODEL_NAME)
     private categoryModel: Model<Category & Document>,
 
-    private driveService: DriveService,
+    private cloudService: CloudService,
   ) {}
 
   async getAll(filter: QueryFilter) {
@@ -55,7 +55,7 @@ export class ProductService {
       },
       {
         $lookup: {
-          from: DRIVE_MODEL_NAME,
+          from: CLOUD_MODEL_NAME,
           localField: 'images',
           foreignField: '_id',
           as: 'images',
@@ -172,7 +172,7 @@ export class ProductService {
     if (!name) throw new BadRequestException(PRODUCT_MESSAGE.NAME_NOT_NULL);
     const listImageId = [];
     if (!!files && files.length > 0) {
-      (await this.driveService.uploadMultiFiles(files)).forEach((e) => {
+      (await this.cloudService.uploadMultiFiles(files)).forEach((e) => {
         listImageId.push(e['_id']);
       });
     }
@@ -232,7 +232,7 @@ export class ProductService {
       newRecord['description'] = description;
     if (!!files && files.length > 0) {
       newRecord['images'] = [];
-      (await this.driveService.uploadMultiFiles(files)).forEach((e) => {
+      (await this.cloudService.uploadMultiFiles(files)).forEach((e) => {
         newRecord['images'].push(e['_id']);
       });
     }
@@ -315,7 +315,7 @@ export class ProductService {
         },
         {
           $lookup: {
-            from: DRIVE_MODEL_NAME,
+            from: CLOUD_MODEL_NAME,
             localField: 'images',
             foreignField: '_id',
             as: 'images',

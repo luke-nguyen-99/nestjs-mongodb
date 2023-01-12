@@ -13,9 +13,9 @@ import { CloudService } from './cloud.service';
         schema: CloudSchema,
       },
     ]),
-    // ImageKitModule
   ],
   providers: [CloudService],
   controllers: [CloudController],
+  exports: [CloudService],
 })
 export class CloudModule {}
